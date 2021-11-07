@@ -11,17 +11,12 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
 	@ApiOperation(value = "查询用户")
-	@ApiImplicitParams({
-		  @ApiImplicitParam(name="id",value="用户ID",dataType="string", paramType = "query")
-	})
-	@ApiResponses({ @ApiResponse(code = 200, message = "OK", response = UserDto.class) })
 	@GetMapping("/user")
 	public UserDto getUser(@RequestParam("id")String id) {
 		return new UserDto();
 	}
 
 	@ApiOperation(value = "新增用户")
-	@ApiResponses({ @ApiResponse(code = 200, message = "OK", response = UserDto.class) })
 	@PostMapping("/user")
 	public UserDto addUser(@RequestBody AddUserParam param) {
 		System.err.println(param.getName());

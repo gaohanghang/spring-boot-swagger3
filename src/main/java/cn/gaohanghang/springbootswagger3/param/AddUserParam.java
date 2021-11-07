@@ -5,7 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
-@ApiModel(value = "com.cxytiandi.auth.param.AddUserParam", description = "新增用户参数")
+@ApiModel(description = "新增用户参数")
 public class AddUserParam {
 
 	@ApiModelProperty(value="ID")
