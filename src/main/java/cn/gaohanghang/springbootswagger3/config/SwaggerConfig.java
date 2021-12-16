@@ -1,35 +1,94 @@
 package cn.gaohanghang.springbootswagger3.config;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.SpringBootVersion;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.oas.annotations.EnableOpenApi;
-import springfox.documentation.service.ApiInfo;
+import springfox.documentation.service.*;
 import springfox.documentation.spi.DocumentationType;
+import springfox.documentation.spi.service.contexts.SecurityContext;
 import springfox.documentation.spring.web.plugins.Docket;
+
+import java.util.*;
 
 @EnableOpenApi
 @Configuration
-public class SwaggerConfig{
+public class SwaggerConfig implements WebMvcConfigurer {
+
+    @Value("${springfox.documentation.swagger-ui.enabled}")
+    private Boolean enable;
 
     @Bean
     public Docket createRestApi() {
-        return new Docket(DocumentationType.OAS_30)
+        return new Docket(DocumentationType.OAS_30).pathMapping("/")
+
+                // 定义是否开启swagger，false为关闭，可以通过变量控制
+                .enable(enable)
+
+                // 将api的元信息设置为包含在json ResourceListing响应中。
                 .apiInfo(apiInfo())
+
+                // 选择哪些接口作为swagger的doc发布
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("cn.gaohanghang.springbootswagger3.controller"))
+                .apis(RequestHandlerSelectors.any())
                 .paths(PathSelectors.any())
+                .build()
+
+                // 支持的通讯协议集合
+                .protocols(newHashSet("https", "http"))
+                .securitySchemes(securitySchemes())
+                // 授权信息全局应用
+                .securityContexts(securityContexts());
+    }
+
+    /**
+     * API 页面上半部分展示信息
+     */
+    private ApiInfo apiInfo() {
+        return new ApiInfoBuilder().title("Api Doc")
+                .description("描述信息")
+                .contact(new Contact("高行行", null, "gaohanghan@gmail.com"))
+                .version("Application Version: " + "1.0" + ", Spring Boot Version: " + SpringBootVersion.getVersion())
                 .build();
     }
 
-    private ApiInfo apiInfo() {
-        return new ApiInfoBuilder()
-                .title("API端接口文档")
-                //.description("更多请咨询服务开发者XXX")
-                //.contact(new Contact("meritco", "北京", ""))
-                .version("1.0")
-                .build();
+    /**
+     * swagger2 认证的安全上下文
+     */
+    private List<SecurityScheme> securitySchemes() {
+        List<SecurityScheme> securitySchemes = new ArrayList<>();
+        securitySchemes.add(new ApiKey("Authorization", "Authorization", "header"));
+        return securitySchemes;
     }
+
+    private List<SecurityContext> securityContexts() {
+        List<SecurityContext> securityContexts = new ArrayList<>();
+        securityContexts.add(SecurityContext.builder()
+                .securityReferences(defaultAuth())
+                .forPaths(PathSelectors.any()).build());
+        return securityContexts;
+    }
+
+    private List<SecurityReference> defaultAuth() {
+        AuthorizationScope authorizationScope = new AuthorizationScope("global", "accessEverything");
+        AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
+        authorizationScopes[0] = authorizationScope;
+        List<SecurityReference> securityReferences = new ArrayList<>();
+        securityReferences.add(new SecurityReference("Authorization", authorizationScopes));
+        return securityReferences;
+    }
+
+    @SafeVarargs
+    private final <T> Set<T> newHashSet(T... ts) {
+        if (ts.length > 0) {
+            return new LinkedHashSet<>(Arrays.asList(ts));
+        }
+        return null;
+    }
+
 }
