@@ -26,7 +26,6 @@ public class SwaggerConfig implements WebMvcConfigurer {
     @Bean
     public Docket createRestApi() {
         return new Docket(DocumentationType.OAS_30).pathMapping("/")
-
                 // 定义是否开启swagger，false为关闭，可以通过变量控制
                 .enable(enable)
 
@@ -42,6 +41,7 @@ public class SwaggerConfig implements WebMvcConfigurer {
                 // 支持的通讯协议集合
                 .protocols(newHashSet("https", "http"))
                 .securitySchemes(securitySchemes())
+
                 // 授权信息全局应用
                 .securityContexts(securityContexts());
     }
@@ -57,15 +57,15 @@ public class SwaggerConfig implements WebMvcConfigurer {
                 .build();
     }
 
-    /**
-     * swagger2 认证的安全上下文
-     */
     private List<SecurityScheme> securitySchemes() {
         List<SecurityScheme> securitySchemes = new ArrayList<>();
         securitySchemes.add(new ApiKey("Authorization", "Authorization", "header"));
         return securitySchemes;
     }
 
+    /**
+     * swagger3 认证的安全上下文
+     */
     private List<SecurityContext> securityContexts() {
         List<SecurityContext> securityContexts = new ArrayList<>();
         securityContexts.add(SecurityContext.builder()
