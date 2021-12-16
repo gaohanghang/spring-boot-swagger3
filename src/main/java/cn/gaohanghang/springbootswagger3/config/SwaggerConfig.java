@@ -70,7 +70,8 @@ public class SwaggerConfig implements WebMvcConfigurer {
         List<SecurityContext> securityContexts = new ArrayList<>();
         securityContexts.add(SecurityContext.builder()
                 .securityReferences(defaultAuth())
-                .forPaths(PathSelectors.any()).build());
+                .operationSelector(operationContext -> true)
+                .build());
         return securityContexts;
     }
 
